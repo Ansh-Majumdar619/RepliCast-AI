@@ -1,8 +1,8 @@
 // 📦 Imports
 import fs from 'fs';
 import path from 'path';
+import axios from 'axios';
 import { fileURLToPath } from 'url';
-import { exec } from 'child_process';
 import { extractMetadata } from '../utils/extractMetadata.js';
 import { processVideo, processAudio, processText } from '../services/mediaProcessor.js';
 import { saveFileToStorage } from '../utils/fileHandler.js';
@@ -48,61 +48,55 @@ export const uploadContent = async (req, res) => {
   }
 };
 
-// 🔗 Upload from YouTube URL (uses yt-dlp)
+// 📥 Helper to download stream
+const downloadFile = async (url, outputPath) => {
+  const response = await axios({ url, responseType: 'stream' });
+  const writer = fs.createWriteStream(outputPath);
+  return new Promise((resolve, reject) => {
+    response.data.pipe(writer);
+    writer.on('finish', resolve);
+    writer.on('error', reject);
+  });
+};
+
+// 🔗 Upload from YouTube URL using Piped.video
 export const uploadFromURL = async (req, res) => {
   try {
     const { url } = req.body;
     if (!url) return res.status(400).json({ error: 'No URL provided' });
 
     const downloadsDir = path.join(__dirname, '..', 'uploads');
-    const ytDlpPath = path.join(__dirname, '..', 'utils', 'yt-dlp'); // Ensure this file exists
-
     if (!fs.existsSync(downloadsDir)) fs.mkdirSync(downloadsDir, { recursive: true });
 
-    // 🏷️ Get video title using yt-dlp
-    exec(`"${ytDlpPath}" --get-title "${url}"`, (err, stdout) => {
-      if (err) {
-        console.error('⛔ yt-dlp title fetch error:', err);
-        return res.status(500).json({ error: 'Title fetch failed', details: err.message });
-      }
+    const videoId = new URL(url).searchParams.get('v') || url.split('/').pop();
+    const pipedApiUrl = `https://pipedapi.kavin.rocks/streams/${videoId}`;
 
-      const rawTitle = stdout.trim();
-      const safeTitle = rawTitle.replace(/[<>:"/\\|?*]+/g, '').replace(/\s+/g, '_');
-      const outputPath = path.join(downloadsDir, `${safeTitle}.mp4`);
-      const metadata = { title: rawTitle };
+    const { data } = await axios.get(pipedApiUrl);
+    const title = data.title || 'video';
+    const safeTitle = title.replace(/[<>:"/\\|?*]+/g, '').replace(/\s+/g, '_');
+    const videoStream = data.videoStreams?.[0]?.url;
 
-      // 🎞️ Download the video using yt-dlp
-      exec(`"${ytDlpPath}" -f best -o "${outputPath}" "${url}"`, async (err) => {
-        if (err) {
-          console.error('⛔ yt-dlp download error:', err);
-          return res.status(500).json({ error: 'Download failed', details: err.message });
-        }
+    if (!videoStream) {
+      return res.status(500).json({ error: 'No video stream found from Piped' });
+    }
 
-        try {
-          const result = await processVideo(outputPath, metadata);
+    const outputPath = path.join(downloadsDir, `${safeTitle}.mp4`);
+    await downloadFile(videoStream, outputPath);
 
-          await Promise.all([
-            ContentJob.create({ type: 'video', title: rawTitle, status: 'completed', output: JSON.stringify(result) }),
-            GeneratedContent.create({ type: 'video', content: fallbackContent(result), result }),
-          ]);
+    const metadata = { title };
+    const result = await processVideo(outputPath, metadata);
 
-          res.status(200).json({ message: 'YouTube video processed', result });
-        } catch (processingError) {
-          console.error('❌ Video processing error:', processingError);
-          res.status(500).json({ error: 'Processing failed', details: processingError.message });
-        }
-      });
-    });
+    await Promise.all([
+      ContentJob.create({ type: 'video', title, status: 'completed', output: JSON.stringify(result) }),
+      GeneratedContent.create({ type: 'video', content: fallbackContent(result), result }),
+    ]);
+
+    res.status(200).json({ message: 'YouTube video processed successfully', result });
   } catch (err) {
     console.error('❌ Upload from URL failed:', err);
     res.status(500).json({ error: 'URL processing failed', details: err.message });
   }
 };
-
-  
-    
-
-
 
 
 
