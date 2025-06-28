@@ -30,13 +30,11 @@ This project streamlines the content creation process by repurposing a single pi
 ### Upload Page
 ![Upload Page](https://github.com/Ansh-Majumdar619/RepliCast-AI/blob/main/frontend/public/uploadpage.png)
 
-### Format Preview Page
+### Home Page
 ![Preview Page](https://github.com/Ansh-Majumdar619/RepliCast-AI/blob/main/frontend/public/homepage.png)
 
-### Dashboard (Optional)
+### Dashboard Page
 ![Dashboard](https://github.com/Ansh-Majumdar619/RepliCast-AI/blob/main/frontend/public/dashboard.png)
-
-> Replace above links with hosted screenshots (GitHub, Imgur, etc.)
 
 ---
 
