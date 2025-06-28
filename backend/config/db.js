@@ -12,6 +12,12 @@ export const sequelize = new Sequelize(
     host: process.env.PG_HOST,
     dialect: 'postgres',
     logging: false,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false, // Accept Render's SSL cert
+      },
+    },
   }
 );
 
@@ -24,3 +30,4 @@ export const connectDB = async () => {
     process.exit(1);
   }
 };
+
