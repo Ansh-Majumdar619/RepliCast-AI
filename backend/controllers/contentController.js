@@ -170,7 +170,9 @@ export const uploadFromURL = async (req, res) => {
     if (!url) return res.status(400).json({ error: 'No URL provided' });
 
     const downloadsDir = path.join(__dirname, 'uploads');
-    const ytDlpPath = path.join(__dirname, 'utils', 'yt-dlp'); // Linux binary
+    // const ytDlpPath = path.join(__dirname, 'utils', 'yt-dlp'); // Linux binary
+    const ytDlpPath = path.join(__dirname, '..', 'utils', 'yt-dlp');
+
 
     if (!fs.existsSync(downloadsDir)) fs.mkdirSync(downloadsDir, { recursive: true });
 
