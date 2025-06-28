@@ -1,16 +1,4 @@
-// import fs from 'fs';
-// import path from 'path';
-// import { exec } from 'child_process';
-// import ytdl from 'ytdl-core';
-// import { extractMetadata } from '../utils/extractMetadata.js';
-// import { processVideo, processAudio, processText } from '../services/mediaProcessor.js';
-// import { saveFileToStorage } from '../utils/fileHandler.js';
-// import ContentJob from '../models/ContentJob.js';
-// import GeneratedContent from '../models/GeneratedContent.js';
-
-
-
-
+// 📦 Imports
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -22,17 +10,9 @@ import { saveFileToStorage } from '../utils/fileHandler.js';
 import ContentJob from '../models/ContentJob.js';
 import GeneratedContent from '../models/GeneratedContent.js';
 
+// 🧭 Correct __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-
-
-
-
-
-
-
-// const __dirname = path.resolve();
 
 // 🔁 Fallback content generator
 const fallbackContent = (r) =>
@@ -76,14 +56,16 @@ export const uploadFromURL = async (req, res) => {
     if (!url) return res.status(400).json({ error: 'No URL provided' });
 
     const downloadsDir = path.join(__dirname, 'uploads');
-    // const ytDlpPath = path.join(__dirname, 'utils', 'yt-dlp.exe');
-    const ytDlpPath = path.join(__dirname, "utils", "yt-dlp"); // no .exe
+    const ytDlpPath = path.join(__dirname, 'utils', 'yt-dlp'); // ✅ Linux-compatible binary
 
     if (!fs.existsSync(downloadsDir)) fs.mkdirSync(downloadsDir);
 
     // 🏷️ Get video title
     exec(`"${ytDlpPath}" --get-title "${url}"`, (err, stdout) => {
-      if (err) return res.status(500).json({ error: 'Title fetch failed', details: err.message });
+      if (err) {
+        console.error('❌ Title fetch error:', err.message);
+        return res.status(500).json({ error: 'Title fetch failed', details: err.message });
+      }
 
       const rawTitle = stdout.trim();
       const safeTitle = rawTitle.replace(/[<>:"/\\|?*]+/g, '').replace(/\s+/g, '_');
@@ -92,7 +74,10 @@ export const uploadFromURL = async (req, res) => {
 
       // 🎞️ Download video
       exec(`"${ytDlpPath}" -f best -o "${outputPath}" "${url}"`, async (err) => {
-        if (err) return res.status(500).json({ error: 'Download failed', details: err.message });
+        if (err) {
+          console.error('❌ Download error:', err.message);
+          return res.status(500).json({ error: 'Download failed', details: err.message });
+        }
 
         const result = await processVideo(outputPath, metadata);
 
