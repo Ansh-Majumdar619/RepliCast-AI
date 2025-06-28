@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+
+
+.btn {
+  @apply bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition;
+}
+
+
+@font-face {
+  font-family: 'YourFont';
+  src: url('./assets/fonts/retro.ttf') format('opentype');
+  font-weight: normal;
+  font-size: 60px;
+  font-style: normal;
+}
+
+body {
+  font-family: 'YourFont', sans-serif;
+  text-transform: none; 
+}
+
+
+
+
+
+#smooth-wrapper {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+#smooth-content {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+}
+
+
+@layer components {
+  .btn-primary {
+    @apply bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition;
+  }
+  .btn-secondary {
+    @apply bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition;
+  }
+}
+
+
+* {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+
+/* index.css */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE & Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}
