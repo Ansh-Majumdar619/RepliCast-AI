@@ -1,5 +1,19 @@
+// import fs from 'fs';
+// import path from 'path';
+// import { exec } from 'child_process';
+// import ytdl from 'ytdl-core';
+// import { extractMetadata } from '../utils/extractMetadata.js';
+// import { processVideo, processAudio, processText } from '../services/mediaProcessor.js';
+// import { saveFileToStorage } from '../utils/fileHandler.js';
+// import ContentJob from '../models/ContentJob.js';
+// import GeneratedContent from '../models/GeneratedContent.js';
+
+
+
+
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { exec } from 'child_process';
 import ytdl from 'ytdl-core';
 import { extractMetadata } from '../utils/extractMetadata.js';
@@ -8,7 +22,17 @@ import { saveFileToStorage } from '../utils/fileHandler.js';
 import ContentJob from '../models/ContentJob.js';
 import GeneratedContent from '../models/GeneratedContent.js';
 
-const __dirname = path.resolve();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+
+
+
+
+
+
+
+// const __dirname = path.resolve();
 
 // 🔁 Fallback content generator
 const fallbackContent = (r) =>
