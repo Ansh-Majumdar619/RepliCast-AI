@@ -13,6 +13,11 @@ import GeneratedContent from '../models/GeneratedContent.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const extractVideoId = (url) => {
+  const match = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/);
+  return match ? match[1] : null;
+};
+
 // 🔁 Fallback content generator
 const fallbackContent = (r) =>
   r.blog || r.summary || r.caption || r.thread || JSON.stringify(r) || 'No content generated';
@@ -65,39 +70,44 @@ export const uploadFromURL = async (req, res) => {
     const { url } = req.body;
     if (!url) return res.status(400).json({ error: 'No URL provided' });
 
+    const videoId = extractVideoId(url);
+    if (!videoId) return res.status(400).json({ error: 'Invalid YouTube URL' });
+
+    const pipedAPI = `https://pipedapi.kavin.rocks/streams/${videoId}`;
+    const response = await axios.get(pipedAPI);
+
+    const videoTitle = response.data.title || 'youtube_video';
+    const safeTitle = videoTitle.replace(/[<>:"/\\|?*]+/g, '').replace(/\s+/g, '_');
+    const videoStreamUrl = response.data.videoStreams?.[0]?.url;
+
+    if (!videoStreamUrl) return res.status(500).json({ error: 'No stream found for video' });
+
     const downloadsDir = path.join(__dirname, '..', 'uploads');
     if (!fs.existsSync(downloadsDir)) fs.mkdirSync(downloadsDir, { recursive: true });
 
-    const videoId = new URL(url).searchParams.get('v') || url.split('/').pop();
-    const pipedApiUrl = `https://pipedapi.kavin.rocks/streams/${videoId}`;
+    const filePath = path.join(downloadsDir, `${safeTitle}.mp4`);
 
-    const { data } = await axios.get(pipedApiUrl);
-    const title = data.title || 'video';
-    const safeTitle = title.replace(/[<>:"/\\|?*]+/g, '').replace(/\s+/g, '_');
-    const videoStream = data.videoStreams?.[0]?.url;
+    const videoStream = await axios({
+      method: 'get',
+      url: videoStreamUrl,
+      responseType: 'stream',
+    });
 
-    if (!videoStream) {
-      return res.status(500).json({ error: 'No video stream found from Piped' });
-    }
+    await pipeline(videoStream.data, fs.createWriteStream(filePath));
 
-    const outputPath = path.join(downloadsDir, `${safeTitle}.mp4`);
-    await downloadFile(videoStream, outputPath);
-
-    const metadata = { title };
-    const result = await processVideo(outputPath, metadata);
+    const result = await processVideo(filePath, { title: videoTitle });
 
     await Promise.all([
-      ContentJob.create({ type: 'video', title, status: 'completed', output: JSON.stringify(result) }),
-      GeneratedContent.create({ type: 'video', content: fallbackContent(result), result }),
+      ContentJob.create({ type: 'video', title: videoTitle, status: 'completed', output: JSON.stringify(result) }),
+      GeneratedContent.create({ type: 'video', content: result.blog || result.caption || 'Generated', result }),
     ]);
 
-    res.status(200).json({ message: 'YouTube video processed successfully', result });
+    res.status(200).json({ message: 'YouTube video processed via Piped', result });
   } catch (err) {
     console.error('❌ Upload from URL failed:', err);
     res.status(500).json({ error: 'URL processing failed', details: err.message });
   }
 };
-
 
 
 
