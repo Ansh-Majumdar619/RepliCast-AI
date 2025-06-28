@@ -2,7 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import ytdl from 'ytdl-core';
+import { exec } from 'child_process';
 import { extractMetadata } from '../utils/extractMetadata.js';
 import { processVideo, processAudio, processText } from '../services/mediaProcessor.js';
 import { saveFileToStorage } from '../utils/fileHandler.js';
@@ -48,52 +48,59 @@ export const uploadContent = async (req, res) => {
   }
 };
 
-// 🔗 Upload from YouTube URL
+// 🔗 Upload from YouTube URL (uses yt-dlp)
 export const uploadFromURL = async (req, res) => {
-  const { url } = req.body;
-  if (!url) return res.status(400).json({ error: 'No URL provided' });
-  let info;
   try {
-    info = await ytdl.getInfo(url);
-  } catch (e) {
-    console.error('❌ ytdl.getInfo failed:', e);
-    return res.status(500).json({ error: 'Fetch info failed', details: e.message });
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ error: 'No URL provided' });
+
+    const downloadsDir = path.join(__dirname, '..', 'uploads');
+    const ytDlpPath = path.join(__dirname, '..', 'utils', 'yt-dlp'); // Ensure this file exists
+
+    if (!fs.existsSync(downloadsDir)) fs.mkdirSync(downloadsDir, { recursive: true });
+
+    // 🏷️ Get video title using yt-dlp
+    exec(`"${ytDlpPath}" --get-title "${url}"`, (err, stdout) => {
+      if (err) {
+        console.error('⛔ yt-dlp title fetch error:', err);
+        return res.status(500).json({ error: 'Title fetch failed', details: err.message });
+      }
+
+      const rawTitle = stdout.trim();
+      const safeTitle = rawTitle.replace(/[<>:"/\\|?*]+/g, '').replace(/\s+/g, '_');
+      const outputPath = path.join(downloadsDir, `${safeTitle}.mp4`);
+      const metadata = { title: rawTitle };
+
+      // 🎞️ Download the video using yt-dlp
+      exec(`"${ytDlpPath}" -f best -o "${outputPath}" "${url}"`, async (err) => {
+        if (err) {
+          console.error('⛔ yt-dlp download error:', err);
+          return res.status(500).json({ error: 'Download failed', details: err.message });
+        }
+
+        try {
+          const result = await processVideo(outputPath, metadata);
+
+          await Promise.all([
+            ContentJob.create({ type: 'video', title: rawTitle, status: 'completed', output: JSON.stringify(result) }),
+            GeneratedContent.create({ type: 'video', content: fallbackContent(result), result }),
+          ]);
+
+          res.status(200).json({ message: 'YouTube video processed', result });
+        } catch (processingError) {
+          console.error('❌ Video processing error:', processingError);
+          res.status(500).json({ error: 'Processing failed', details: processingError.message });
+        }
+      });
+    });
+  } catch (err) {
+    console.error('❌ Upload from URL failed:', err);
+    res.status(500).json({ error: 'URL processing failed', details: err.message });
   }
-
-  const rawTitle = info.videoDetails.title;
-  const safeTitle = rawTitle.replace(/[<>:"/\\|?*]+/g, '').replace(/\s+/g, '_');
-  const downloadsDir = path.join(__dirname, 'uploads');
-  if (!fs.existsSync(downloadsDir)) fs.mkdirSync(downloadsDir, { recursive: true });
-
-  const outputPath = path.join(downloadsDir, `${safeTitle}.mp4`);
-  console.log('➡️ Downloading to:', outputPath);
-
-  const video = ytdl(url, { quality: 'highestvideo' });
-  const writeStream = fs.createWriteStream(outputPath);
-
-  video.pipe(writeStream);
-
-  writeStream.on('finish', async () => {
-    console.log('✅ Download finished, processing video.');
-    try {
-      const result = await processVideo(outputPath, { title: rawTitle });
-      await Promise.all([
-        ContentJob.create({ type: 'video', title: rawTitle, status: 'completed', output: JSON.stringify(result) }),
-        GeneratedContent.create({ type: 'video', content: fallbackContent(result), result })
-      ]);
-      return res.status(200).json({ message: 'Processed', result });
-    } catch (e) {
-      console.error('❌ Video processing error:', e);
-      return res.status(500).json({ error: 'Processing failed', details: e.message });
-    }
-  });
-
-  writeStream.on('error', (e) => {
-    console.error('❌ File write error:', e);
-    return res.status(500).json({ error: 'Download failed', details: e.message });
-  });
 };
 
+  
+    
 
 
 
