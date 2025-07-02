@@ -14,7 +14,6 @@ This project streamlines the content creation process by repurposing a single pi
 
 ## 🧩 Features
 
-- ✅ Upload from file or URL
 - 🎬 Convert long videos into shorts
 - ✍️ Generate blog posts & summaries
 - 🧵 Convert into Twitter threads
@@ -49,7 +48,7 @@ This project streamlines the content creation process by repurposing a single pi
 └──────────────────────────────┘
 
 ┌─────────────── Upload Page ───────────────┐
-│ [📁 Upload File]  or  [🔗 Paste URL]       │
+│ [📁 Upload File]                          │
 │ File Type: [Auto-Detect]                  │
 │ Metadata: Title, Duration, Keywords       │
 │ [Generate Formats]  → [Processing...]     │
