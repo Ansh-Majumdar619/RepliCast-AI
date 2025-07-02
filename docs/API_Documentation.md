@@ -6,7 +6,7 @@ Generate blogs, captions, hashtags, and more from a single video/audio/text inpu
 
 ## 📌 Features
 
-- 🔁 Upload content (file or YouTube URL)
+- 🔁 Upload content (file)
 - ✨ Auto-generate:
   - 📝 Blog post
   - 🧵 Twitter thread
@@ -30,7 +30,7 @@ Generate blogs, captions, hashtags, and more from a single video/audio/text inpu
 
 | Input | Output |
 |-------|--------|
-| 🎥 YouTube Video | 📝 Blog + 📸 Instagram Caption + 🧵 Thread + 📌 Hashtags |
+| 📝 Blog + 📸 Instagram Caption + 🧵 Thread + 📌 Hashtags |
 | 🔊 Podcast | Same as above |
 | 📄 Text File | Blog post + Summaries + Captions |
 
@@ -56,7 +56,6 @@ This tool helps creators and teams:
 - 🧠 Backend: Node.js, Express, Sequelize, PostgreSQL
 - 🔍 AI: OpenAI APIs
 - 📥 File Uploads: Multer
-- 🎬 YouTube Support: yt-dlp
 
 ---
 
