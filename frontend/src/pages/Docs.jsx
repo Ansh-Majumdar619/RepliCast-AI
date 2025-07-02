@@ -44,7 +44,7 @@ export default function Docs() {
 
         {/* Features List */}
         <ul className="list-disc space-y-3 ml-5 text-base sm:text-lg">
-          <li>Upload video, audio, or text files—or paste a URL.</li>
+{/*           <li>Upload video, audio, or text files—or paste a URL.</li> */}
           <li>Auto-detects content type and extracts metadata (title, duration, keywords).</li>
           <li>
             Generates multiple outputs:
