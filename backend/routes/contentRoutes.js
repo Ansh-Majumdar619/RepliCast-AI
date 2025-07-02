@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { uploadContent, uploadFromURL } from '../controllers/contentController.js';
+import { uploadContent} from '../controllers/contentController.js';
 import GeneratedContent from '../models/GeneratedContent.js';
 
 const router = express.Router();
@@ -21,6 +21,6 @@ router.get('/generated', async (req, res) => {
 router.post('/upload', upload.single('file'), uploadContent);
 
 // 🔗 POST: Upload from YouTube URL
-router.post('/upload-url', uploadFromURL);
+// router.post('/upload-url', uploadFromURL);
 
 export default router;
