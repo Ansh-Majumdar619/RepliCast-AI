@@ -74,59 +74,62 @@ export default function UploadPage() {
         <UploadForm onUpload={handleUpload} />
 
         {/* 🔗 Upload from YouTube URL */}
-{/*         <motion.form
-          onSubmit={handleURL}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="space-y-4"
+{/*
+<motion.form
+  onSubmit={handleURL}
+  initial={{ opacity: 0, y: 30 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 0.4 }}
+  className="space-y-4"
+>
+  <input
+    type="text"
+    placeholder="📹 Paste YouTube video URL"
+    value={url}
+    onChange={(e) => setUrl(e.target.value)}
+    className="w-full bg-black border border-[#e8dcc0]/40 text-[#e8dcc0] placeholder-[#e8dcc0]/60 rounded-md px-4 py-2 focus:outline-none focus:border-[#e8dcc0]"
+  />
+
+  <button
+    type="submit"
+    disabled={isLoading}
+    className={`w-full font-semibold rounded-md cursor-pointer py-2 transition ${
+      isLoading
+        ? 'bg-[#a1937a] text-black cursor-not-allowed'
+        : 'bg-[#e8dcc0] text-black hover:bg-[#60442e] hover:text-[#dfcea9]'
+    }`}
+  >
+    {isLoading ? (
+      <span className="flex justify-center items-center gap-2">
+        <svg
+          className="animate-spin h-5 w-5 text-black"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
         >
-          <input
-            type="text"
-            placeholder="📹 Paste YouTube video URL"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            className="w-full bg-black border border-[#e8dcc0]/40 text-[#e8dcc0] placeholder-[#e8dcc0]/60 rounded-md px-4 py-2 focus:outline-none focus:border-[#e8dcc0]"
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
           />
- */}
-          // <button
-          //   type="submit"
-          //   disabled={isLoading}
-          //   className={`w-full font-semibold rounded-md cursor-pointer py-2 transition ${
-          //     isLoading
-          //       ? 'bg-[#a1937a] text-black cursor-not-allowed'
-          //       : 'bg-[#e8dcc0] text-black hover:bg-[#60442e] hover:text-[#dfcea9]'
-          //   }`}
-          // >
-          //   {isLoading ? (
-          //     <span className="flex justify-center items-center gap-2">
-          //       <svg
-          //         className="animate-spin h-5 w-5 text-black"
-          //         xmlns="http://www.w3.org/2000/svg"
-          //         fill="none"
-          //         viewBox="0 0 24 24"
-          //       >
-        //           <circle
-        //             className="opacity-25"
-        //             cx="12"
-        //             cy="12"
-        //             r="10"
-        //             stroke="currentColor"
-        //             strokeWidth="4"
-        //           />
-        //           <path
-        //             className="opacity-75"
-        //             fill="currentColor"
-        //             d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-        //           />
-        //         </svg>
-        //         Uploading...
-        //       </span>
-        //     ) : (
-        //       '⬆️ Upload from URL'
-        //     )}
-        //   </button>
-        // </motion.form>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+          />
+        </svg>
+        Uploading...
+      </span>
+    ) : (
+      '⬆️ Upload from URL'
+    )}
+  </button>
+</motion.form>
+*/}
+
 
         {/* ❌ Error */}
         {error && (
