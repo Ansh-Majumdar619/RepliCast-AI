@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import gsap from 'gsap';
 
 import UploadForm from '../components/UploadForm';
-import { uploadContent, uploadFromURL } from '../api/contentAPI';
+import { uploadContent} from '../api/contentAPI';
 
 export default function UploadPage() {
   const navigate = useNavigate();
